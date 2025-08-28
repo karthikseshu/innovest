@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_URL=postgresql://postgres:password@db:5432/email_parser
+      - EMAIL_HOST=${EMAIL_HOST:-imap.gmail.com}
+      - EMAIL_PORT=${EMAIL_PORT:-993}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+    restart: unless-stopped
+    networks:
+      - email_parser_network
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=email_parser
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - email_parser_network
+
+  # Optional: Redis for caching (uncomment if needed)
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - email_parser_network
+
+volumes:
+  postgres_data:
+
+networks:
+  email_parser_network:
+    driver: bridge

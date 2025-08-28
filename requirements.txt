@@ -1,0 +1,29 @@
+# Core dependencies - using latest versions for Python 3.11 compatibility
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+
+# Database
+sqlalchemy
+alembic
+
+# HTTP client
+httpx
+requests
+
+# Date parsing
+python-dateutil
+
+# Testing
+pytest
+pytest-asyncio
+pytest-cov
+
+# Code quality
+black
+flake8
+mypy
+
+# Development
+python-multipart

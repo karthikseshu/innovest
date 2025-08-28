@@ -1,0 +1,25 @@
+# Python / project
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.env
+.env.*
+.venv
+transactions.db
+parser_out.json
+*.sqlite3
+
+# IDEs
+.vscode/
+.idea/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Mac
+.DS_Store
