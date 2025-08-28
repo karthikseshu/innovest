@@ -1,7 +1,7 @@
 # Core dependencies - using latest versions for Python 3.11 compatibility
 fastapi
 uvicorn[standard]
-pydantic
+pydantic>=2.0
 python-dotenv
 
 # Database
@@ -27,3 +27,4 @@ mypy
 
 # Development
 python-multipart
+pydantic-settings
