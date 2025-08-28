@@ -124,12 +124,17 @@ async def root():
 
 
 if __name__ == "__main__":
+    import os
     import uvicorn
-    
+
+    # Prefer platform-provided PORT (e.g., Render) and HOST, fall back to settings
+    port = int(os.environ.get("PORT", settings.app_port))
+    host = os.environ.get("HOST", settings.app_host) or settings.app_host
+
     uvicorn.run(
         "src.email_parser.api.main:app",
-        host="0.0.0.0",
-        port=8000,
+        host=host,
+        port=port,
         reload=True,
         log_level=settings.log_level.lower()
     )
