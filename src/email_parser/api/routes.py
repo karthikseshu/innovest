@@ -69,18 +69,19 @@ async def sync_emails_by_sender(
     # Return clean transaction data
     clean_transactions = []
     for transaction in result.get("transactions", []):
-        clean_transactions.append({
-            "amount_paid": transaction.get("amount"),
-            "paid_by": transaction.get("sender"),
-            "paid_to": transaction.get("recipient"),
-            "payment_status": transaction.get("status"),
-            "deposited_to": transaction.get("deposited_to"),
-            "transaction_number": transaction.get("transaction_id"),
-            # 'email_date' contains ISO datetime string from processor
-            "transaction_date": transaction.get("email_date"),
-            "currency": transaction.get("currency"),
-            "transaction_type": transaction.get("transaction_type")
-        })
+        recipient = transaction.get("recipient", "")
+        if recipient and recipient.lower() == "blockchain realty".lower():
+            clean_transactions.append({
+                "amount_paid": transaction.get("amount"),
+                "paid_by": transaction.get("sender"),
+                "paid_to": recipient,
+                "payment_status": transaction.get("status"),
+                "deposited_to": transaction.get("deposited_to"),
+                "transaction_number": transaction.get("transaction_id"),
+                "transaction_date": transaction.get("email_date"),
+                "currency": transaction.get("currency"),
+                "transaction_type": transaction.get("transaction_type")
+            })
 
     return {
         "processed_emails": result.get("processed_emails", 0),
@@ -109,17 +110,19 @@ async def sync_emails_by_sender_date_range(
 
     clean_transactions = []
     for transaction in result.get("transactions", []):
-        clean_transactions.append({
-            "amount_paid": transaction.get("amount"),
-            "paid_by": transaction.get("sender"),
-            "paid_to": transaction.get("recipient"),
-            "payment_status": transaction.get("status"),
-            "deposited_to": transaction.get("deposited_to"),
-            "transaction_number": transaction.get("transaction_id"),
-            "transaction_date": transaction.get("email_date"),
-            "currency": transaction.get("currency"),
-            "transaction_type": transaction.get("transaction_type")
-        })
+        recipient = transaction.get("recipient", "")
+        if recipient and recipient.lower() == "blockchain realty".lower():
+            clean_transactions.append({
+                "amount_paid": transaction.get("amount"),
+                "paid_by": transaction.get("sender"),
+                "paid_to": recipient,
+                "payment_status": transaction.get("status"),
+                "deposited_to": transaction.get("deposited_to"),
+                "transaction_number": transaction.get("transaction_id"),
+                "transaction_date": transaction.get("email_date"),
+                "currency": transaction.get("currency"),
+                "transaction_type": transaction.get("transaction_type")
+            })
 
     return {
         "processed_emails": result.get("processed_emails", 0),
@@ -143,17 +146,19 @@ async def sync_emails_by_content(
 
     clean_transactions = []
     for transaction in result.get("transactions", []):
-        clean_transactions.append({
-            "amount_paid": transaction.get("amount"),
-            "paid_by": transaction.get("sender"),
-            "paid_to": transaction.get("recipient"),
-            "payment_status": transaction.get("status"),
-            "deposited_to": transaction.get("deposited_to"),
-            "transaction_number": transaction.get("transaction_id"),
-            "transaction_date": transaction.get("email_date"),
-            "currency": transaction.get("currency"),
-            "transaction_type": transaction.get("transaction_type")
-        })
+        recipient = transaction.get("recipient", "")
+        if recipient and recipient.lower() == "blockchain realty".lower():
+            clean_transactions.append({
+                "amount_paid": transaction.get("amount"),
+                "paid_by": transaction.get("sender"),
+                "paid_to": recipient,
+                "payment_status": transaction.get("status"),
+                "deposited_to": transaction.get("deposited_to"),
+                "transaction_number": transaction.get("transaction_id"),
+                "transaction_date": transaction.get("email_date"),
+                "currency": transaction.get("currency"),
+                "transaction_type": transaction.get("transaction_type")
+            })
 
     return {
         "processed_emails": result.get("processed_emails", 0),
@@ -182,17 +187,19 @@ async def sync_emails_by_content_date_range(
 
     clean_transactions = []
     for transaction in result.get("transactions", []):
-        clean_transactions.append({
-            "amount_paid": transaction.get("amount"),
-            "paid_by": transaction.get("sender"),
-            "paid_to": transaction.get("recipient"),
-            "payment_status": transaction.get("status"),
-            "deposited_to": transaction.get("recipient"),
-            "transaction_number": transaction.get("transaction_id"),
-            "transaction_date": transaction.get("email_date"),
-            "currency": transaction.get("currency"),
-            "transaction_type": transaction.get("transaction_type")
-        })
+        recipient = transaction.get("recipient", "")
+        if recipient and recipient.lower() == "blockchain realty".lower():
+            clean_transactions.append({
+                "amount_paid": transaction.get("amount"),
+                "paid_by": transaction.get("sender"),
+                "paid_to": recipient,
+                "payment_status": transaction.get("status"),
+                "deposited_to": transaction.get("deposited_to"),
+                "transaction_number": transaction.get("transaction_id"),
+                "transaction_date": transaction.get("email_date"),
+                "currency": transaction.get("currency"),
+                "transaction_type": transaction.get("transaction_type")
+            })
 
     return {
         "processed_emails": result.get("processed_emails", 0),
@@ -216,17 +223,19 @@ async def sync_emails_by_subject(
 
     clean_transactions = []
     for transaction in result.get("transactions", []):
-        clean_transactions.append({
-            "amount_paid": transaction.get("amount"),
-            "paid_by": transaction.get("sender"),
-            "paid_to": transaction.get("recipient"),
-            "payment_status": transaction.get("status"),
-            "deposited_to": transaction.get("recipient"),
-            "transaction_number": transaction.get("transaction_id"),
-            "transaction_date": transaction.get("email_date"),
-            "currency": transaction.get("currency"),
-            "transaction_type": transaction.get("transaction_type")
-        })
+        recipient = transaction.get("recipient", "")
+        if recipient and recipient.lower() == "blockchain realty".lower():
+            clean_transactions.append({
+                "amount_paid": transaction.get("amount"),
+                "paid_by": transaction.get("sender"),
+                "paid_to": recipient,
+                "payment_status": transaction.get("status"),
+                "deposited_to": transaction.get("deposited_to"),
+                "transaction_number": transaction.get("transaction_id"),
+                "transaction_date": transaction.get("email_date"),
+                "currency": transaction.get("currency"),
+                "transaction_type": transaction.get("transaction_type")
+            })
 
     return {
         "processed_emails": result.get("processed_emails", 0),
