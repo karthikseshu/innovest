@@ -1,16 +1,16 @@
-# Production dependencies - minimal and tested
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
-pydantic-settings==2.1.0
-python-dotenv==1.0.0
-sqlalchemy==2.0.25
-httpx==0.26.0
-requests==2.31.0
-supabase==2.3.4
-google-auth==2.26.2
-google-auth-oauthlib==1.2.0
-google-auth-httplib2==0.2.0
-google-api-python-client==2.115.0
-python-dateutil==2.8.2
-python-multipart==0.0.6
+# Production requirements - unpinned for maximum compatibility
+fastapi
+uvicorn[standard]
+pydantic>=2.0
+pydantic-settings
+python-dotenv
+sqlalchemy
+httpx
+requests
+supabase
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+python-dateutil
+python-multipart
