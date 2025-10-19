@@ -33,19 +33,15 @@ Use this checklist to deploy the email-reader API and set up the daily cron job.
 
 ## 🚀 Deployment Steps
 
-### Phase 1: Deploy to Vercel
+### Phase 1: Verify Render Deployment
 
-#### Step 1: Initial Deployment
-- [ ] Go to https://vercel.com/dashboard
-- [ ] Click "Add New..." → "Project"
-- [ ] Import your GitHub repository
-- [ ] Configure build settings:
-  - Framework Preset: **Other**
-  - Build Command: `pip install -r requirements.txt`
-  - Output Directory: *(leave empty)*
+#### Step 1: Find Your Render Service URL
+- [ ] Go to https://dashboard.render.com
+- [ ] Find your email-reader service
+- [ ] Copy the service URL (e.g., `https://email-reader-xxx.onrender.com`)
 
-#### Step 2: Add Environment Variables
-In Vercel Dashboard → Settings → Environment Variables, add:
+#### Step 2: Verify Environment Variables
+In Render Dashboard → Your Service → Environment, ensure these are set:
 
 - [ ] `SUPABASE_URL`
 - [ ] `SUPABASE_ANON_KEY`
@@ -54,26 +50,29 @@ In Vercel Dashboard → Settings → Environment Variables, add:
 - [ ] `GOOGLE_CLIENT_SECRET`
 - [ ] `BATCH_JOB_API_KEY`
 
-**Important**: Select "All" for environment (Production, Preview, Development)
+**Note**: If `BATCH_JOB_API_KEY` is missing, generate one:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+Then add it in Render Dashboard → Environment → Add Environment Variable
 
-#### Step 3: Deploy
-- [ ] Click "Deploy"
+#### Step 3: Redeploy (if environment variables were added)
+- [ ] Click "Manual Deploy" → "Deploy latest commit" (only if you added new env vars)
 - [ ] Wait for deployment to complete (~2-3 minutes)
-- [ ] Copy your Vercel deployment URL (e.g., `https://email-reader-xxx.vercel.app`)
 
-#### Step 4: Test Vercel Deployment
+#### Step 4: Test Render Deployment
 ```bash
 # Test health endpoint
-curl https://your-app.vercel.app/
+curl https://your-service-name.onrender.com/
 
 # Test batch endpoint
-curl -X POST "https://your-app.vercel.app/api/v1/batch/daily-sync?target_date=2025-10-18" \
+curl -X POST "https://your-service-name.onrender.com/api/v1/batch/daily-sync?target_date=2025-10-18" \
   -H "X-API-Key: your_batch_job_api_key"
 ```
 
 - [ ] Health endpoint returns 200 OK
 - [ ] Batch endpoint processes emails successfully
-- [ ] Check Vercel logs for any errors
+- [ ] Check Render logs for any errors (Dashboard → Logs tab)
 
 ---
 
@@ -103,11 +102,11 @@ supabase functions deploy daily-email-sync --no-verify-jwt
 
 #### Step 4: Set Edge Function Secrets
 ```bash
-supabase secrets set VERCEL_API_URL=https://your-app.vercel.app
+supabase secrets set RENDER_API_URL=https://your-service-name.onrender.com
 supabase secrets set BATCH_JOB_API_KEY=your_batch_job_api_key
 ```
-- [ ] `VERCEL_API_URL` secret set
-- [ ] `BATCH_JOB_API_KEY` secret set
+- [ ] `RENDER_API_URL` secret set (use your Render service URL)
+- [ ] `BATCH_JOB_API_KEY` secret set (same key as in Render)
 
 #### Step 5: Test Edge Function
 ```bash
@@ -169,8 +168,8 @@ SELECT cron.schedule(
 
 ### Check All Components
 
-#### 1. Vercel API
-- [ ] Visit: `https://your-app.vercel.app/`
+#### 1. Render API
+- [ ] Visit: `https://your-service-name.onrender.com/`
 - [ ] Returns: `{"message": "Email Transaction Parser API", "version": "1.0.0", "status": "running"}`
 
 #### 2. Supabase Edge Function

@@ -4,7 +4,7 @@
 
 A fully automated system that:
 1. **Runs daily at 2:00 AM EST** via Supabase cron job
-2. **Calls Vercel-hosted API** to process emails from the previous day
+2. **Calls your existing Render API** to process emails from the previous day
 3. **Fetches all active OAuth integrations** from `api.email_integrations`
 4. **Extracts payment transactions** from Gmail using the Gmail API
 5. **Inserts data** into `staging.pay_transactions` in Supabase
@@ -32,7 +32,7 @@ A fully automated system that:
                                   │
                                   ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│           Vercel API (email-reader) - Hosted on Vercel          │
+│            Render API (email-reader) - Already Deployed          │
 │           Endpoint: POST /api/v1/batch/daily-sync                │
 │           • Fetches active OAuth integrations                    │
 │           • For each integration:                                │
@@ -58,13 +58,12 @@ A fully automated system that:
 
 ### Documentation
 - ✅ `SUPABASE_CRON_SETUP.md` - Comprehensive cron job setup guide
-- ✅ `VERCEL_DEPLOYMENT.md` - Vercel deployment instructions
+- ✅ `RENDER_DEPLOYMENT.md` - Render deployment verification guide
 - ✅ `DEPLOYMENT_CHECKLIST.md` - Step-by-step deployment checklist
 - ✅ `QUICK_REFERENCE.md` - Quick commands and queries
 - ✅ `CRON_JOB_SUMMARY.md` - This file
 
 ### Configuration
-- ✅ `vercel.json` - Vercel deployment configuration
 - ✅ `setup_cron_job.sql` - SQL to create cron job in Supabase
 
 ### Code
@@ -135,16 +134,15 @@ A fully automated system that:
 
 ## 🚀 Deployment Steps (High-Level)
 
-### Phase 1: Deploy to Vercel
-1. Connect GitHub repo to Vercel
-2. Add environment variables
-3. Deploy
-4. Test API endpoint
+### Phase 1: Verify Render Deployment
+1. Find your Render service URL
+2. Verify environment variables are set
+3. Test API endpoint
 
 ### Phase 2: Deploy Edge Function
 1. Install Supabase CLI
 2. Deploy Edge Function
-3. Set secrets (VERCEL_API_URL, BATCH_JOB_API_KEY)
+3. Set secrets (RENDER_API_URL, BATCH_JOB_API_KEY)
 4. Test Edge Function
 
 ### Phase 3: Set Up Cron Job
@@ -168,11 +166,13 @@ A fully automated system that:
 
 ## 💰 Cost Estimate
 
-### Vercel (Free Tier)
+### Render (Already Deployed)
 - **API Calls**: ~30/month (1 per day)
 - **Function Execution**: ~30 seconds/day = ~15 minutes/month
 - **Bandwidth**: Minimal (JSON responses)
-- **Cost**: **$0** (well within free tier)
+- **Free Tier**: Works but may have cold starts
+- **Starter ($7/month)**: Recommended for always-on cron jobs
+- **Your Cost**: Depends on your current Render plan
 
 ### Supabase (Free Tier)
 - **Edge Function**: ~30 invocations/month
@@ -185,7 +185,7 @@ A fully automated system that:
 - **Daily Usage**: ~100-500 units (processing ~10 emails)
 - **Cost**: **$0** (free)
 
-**Total Monthly Cost**: **$0** 🎉
+**Additional Cost for Cron**: **$0** (if already on paid Render plan) or **$7/month** (if upgrading from free) 🎉
 
 ## 🔍 Monitoring
 
@@ -219,7 +219,7 @@ WHERE DATE(created_at) = CURRENT_DATE;
 ### Updates
 To update the API code:
 1. Push changes to GitHub
-2. Vercel auto-deploys
+2. Render auto-deploys (if connected to GitHub)
 3. No cron job changes needed
 
 To update Edge Function:
@@ -240,7 +240,7 @@ supabase functions deploy daily-email-sync --no-verify-jwt
 ## 📚 Documentation Index
 
 1. **[SUPABASE_CRON_SETUP.md](SUPABASE_CRON_SETUP.md)** - Detailed cron setup
-2. **[VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md)** - Vercel deployment guide
+2. **[RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md)** - Render deployment verification
 3. **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Step-by-step checklist
 4. **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick commands
 5. **[CRON_JOB_SUMMARY.md](CRON_JOB_SUMMARY.md)** - This file
@@ -248,14 +248,14 @@ supabase functions deploy daily-email-sync --no-verify-jwt
 ## 🎓 Next Steps
 
 1. **Review Documentation**: Read through all documentation files
-2. **Deploy to Vercel**: Follow `VERCEL_DEPLOYMENT.md`
+2. **Verify Render**: Follow `RENDER_DEPLOYMENT.md` to verify your deployment
 3. **Set Up Cron Job**: Follow `SUPABASE_CRON_SETUP.md`
 4. **Use Checklist**: Follow `DEPLOYMENT_CHECKLIST.md` step by step
 5. **Monitor**: Use queries from `QUICK_REFERENCE.md`
 
 ## 📞 Support Resources
 
-- **Vercel Docs**: https://vercel.com/docs
+- **Render Docs**: https://render.com/docs
 - **Supabase Docs**: https://supabase.com/docs
 - **Gmail API Docs**: https://developers.google.com/gmail/api
 - **pg_cron Docs**: https://github.com/citusdata/pg_cron

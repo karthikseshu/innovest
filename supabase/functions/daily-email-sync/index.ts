@@ -29,11 +29,11 @@ serve(async (req) => {
     console.log('🚀 Starting daily email sync...');
 
     // Get environment variables
-    const VERCEL_API_URL = Deno.env.get('VERCEL_API_URL');
+    const RENDER_API_URL = Deno.env.get('RENDER_API_URL');
     const BATCH_JOB_API_KEY = Deno.env.get('BATCH_JOB_API_KEY');
 
-    if (!VERCEL_API_URL || !BATCH_JOB_API_KEY) {
-      throw new Error('Missing required environment variables: VERCEL_API_URL or BATCH_JOB_API_KEY');
+    if (!RENDER_API_URL || !BATCH_JOB_API_KEY) {
+      throw new Error('Missing required environment variables: RENDER_API_URL or BATCH_JOB_API_KEY');
     }
 
     // Calculate yesterday's date in YYYY-MM-DD format
@@ -43,9 +43,9 @@ serve(async (req) => {
 
     console.log(`📅 Target date: ${targetDate}`);
 
-    // Call the email-reader API
-    const apiUrl = `${VERCEL_API_URL}/api/v1/batch/daily-sync?target_date=${targetDate}`;
-    console.log(`🔗 Calling API: ${apiUrl}`);
+    // Call the email-reader API on Render
+    const apiUrl = `${RENDER_API_URL}/api/v1/batch/daily-sync?target_date=${targetDate}`;
+    console.log(`🔗 Calling Render API: ${apiUrl}`);
 
     const response = await fetch(apiUrl, {
       method: 'POST',
