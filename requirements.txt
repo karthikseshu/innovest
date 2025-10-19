@@ -15,7 +15,7 @@ requests==2.31.0
 
 # Supabase - pinned version
 supabase==2.3.4
-postgrest-py==0.13.2
+postgrest-py==0.10.6
 realtime==1.0.5
 supafunc==0.3.3
 storage3==0.7.4
