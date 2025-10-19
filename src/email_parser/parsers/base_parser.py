@@ -55,13 +55,17 @@ class BaseParser(ABC):
         """
         body = ""
         
+        self.logger.info(f"Email is_multipart: {email_message.is_multipart()}")
+        
         if email_message.is_multipart():
             # Prefer text/plain parts
             for part in email_message.walk():
                 content_type = part.get_content_type()
+                self.logger.info(f"Found part with content_type: {content_type}")
                 if content_type == "text/plain":
                     try:
                         body = part.get_payload(decode=True).decode(errors="ignore")
+                        self.logger.info(f"Extracted text/plain body (first 200 chars): {body[:200]}...")
                         break
                     except Exception as e:
                         self.logger.warning(f"Failed to decode email part: {e}")
@@ -107,6 +111,8 @@ class BaseParser(ABC):
             except Exception as e:
                 self.logger.warning(f"Failed to decode email payload: {e}")
         
+        self.logger.info(f"Final extracted body length: {len(body)}")
+        self.logger.info(f"Final extracted body (first 500 chars): {body[:500]}...")
         return body
 
     def extract_email_subject(self, email_message: Message) -> str:

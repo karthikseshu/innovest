@@ -12,6 +12,16 @@ alembic
 httpx
 requests
 
+# Supabase
+supabase==2.3.4
+postgrest-py
+
+# OAuth and Gmail API
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+
 # Date parsing
 python-dateutil
 

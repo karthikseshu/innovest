@@ -32,6 +32,9 @@ if PydanticBacked:
         app_port: int = 8000
         log_level: str = "INFO"
         app_name: str = "Email Transaction Parser"
+        
+        # Batch Job Authentication
+        batch_job_api_key: Optional[str] = None  # API key for batch job endpoints
 
         class Config:
             env_file = ".env"
@@ -109,6 +112,9 @@ else:
             self.app_port = int(os.environ.get('APP_PORT', 8000))
             self.log_level = os.environ.get('LOG_LEVEL', 'INFO')
             self.app_name = os.environ.get('APP_NAME', 'Email Transaction Parser')
+            
+            # Batch Job Authentication
+            self.batch_job_api_key = os.environ.get('BATCH_JOB_API_KEY')
 
         def email_server_config(self) -> dict:
             """Get email server configuration based on host."""
