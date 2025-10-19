@@ -1,32 +1,16 @@
-# Production dependencies only - optimized for Render deployment
-# Use this file in Render to speed up builds and reduce memory usage
-
-# Core dependencies
+# Production dependencies - minimal and tested
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
-pydantic>=2.0,<3.0
+pydantic==2.5.3
 pydantic-settings==2.1.0
 python-dotenv==1.0.0
-
-# Database
 sqlalchemy==2.0.25
-
-# HTTP client
 httpx==0.26.0
 requests==2.31.0
-
-# Supabase - let supabase package handle its own dependencies
 supabase==2.3.4
-
-# OAuth and Gmail API
 google-auth==2.26.2
 google-auth-oauthlib==1.2.0
 google-auth-httplib2==0.2.0
 google-api-python-client==2.115.0
-
-# Date parsing
 python-dateutil==2.8.2
-
-# Production server
 python-multipart==0.0.6
-
