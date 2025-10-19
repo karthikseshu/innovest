@@ -5,6 +5,7 @@ This works with gmail.readonly scope and doesn't require IMAP access.
 import logging
 import base64
 import email
+import os
 from typing import List, Optional, Generator
 from email.message import Message
 from datetime import datetime
@@ -33,8 +34,20 @@ class GmailAPIClient:
     def __enter__(self):
         """Initialize Gmail API service."""
         try:
-            # Create credentials from access token
-            credentials = Credentials(token=self.access_token)
+            # Get Google OAuth credentials from environment
+            client_id = os.environ.get('GOOGLE_CLIENT_ID')
+            client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
+            
+            # Create credentials with all necessary fields for token refresh
+            credentials = Credentials(
+                token=self.access_token,
+                refresh_token=self.refresh_token,
+                token_uri='https://oauth2.googleapis.com/token',
+                client_id=client_id,
+                client_secret=client_secret
+            )
+            
+            logger.info(f"Creating Gmail API credentials with refresh capability: {bool(self.refresh_token and client_id and client_secret)}")
             
             # Build Gmail API service
             self.service = build('gmail', 'v1', credentials=credentials)
