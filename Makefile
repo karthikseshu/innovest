@@ -7,17 +7,17 @@ help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 install: ## Install dependencies
-	pip install -r requirements.txt
+	./venv/bin/pip install -r requirements.txt
 
 install-dev: ## Install development dependencies
-	pip install -r requirements.txt
-	pip install -e .[dev]
+	./venv/bin/pip install -r requirements.txt
+	./venv/bin/pip install -e .[dev]
 
 setup-db: ## Initialize database
-	python scripts/setup_db.py
+	./venv/bin/python scripts/setup_db.py
 
 run: ## Run the application
-	uvicorn src.email_parser.api.main:app --reload --host 0.0.0.0 --port 8000
+	./venv/bin/uvicorn src.email_parser.api.main:app --reload --host 0.0.0.0 --port 8000
 
 test: ## Run tests
 	pytest tests/ -v

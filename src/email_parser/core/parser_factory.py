@@ -7,6 +7,7 @@ from email.message import Message
 
 from ..parsers.base_parser import BaseParser
 from ..parsers.cashapp_parser import CashAppParser
+from ..parsers.generic_payment_parser import GenericPaymentParser
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +21,11 @@ class ParserFactory:
     
     def _register_default_parsers(self):
         """Register the default parsers."""
+        # Register specific parsers first (they have priority)
         self.register_parser("cashapp", CashAppParser())
-        logger.info("Registered default parsers")
+        # Register generic parser last (it's the fallback)
+        self.register_parser("generic_payment", GenericPaymentParser())
+        logger.info("Registered default parsers (cashapp, generic_payment)")
     
     def register_parser(self, name: str, parser: BaseParser):
         """

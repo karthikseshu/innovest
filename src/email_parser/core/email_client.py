@@ -17,26 +17,55 @@ logger = logging.getLogger(__name__)
 class EmailClient:
     """Email client for connecting to IMAP servers."""
     
-    def __init__(self):
-        """Initialize email client."""
+    def __init__(self, server: str = None, port: int = None, use_ssl: bool = None, 
+                 username: str = None, password: str = None):
+        """
+        Initialize email client.
+        
+        Args:
+            server: IMAP server address (optional, uses settings if not provided)
+            port: IMAP port (optional, uses settings if not provided)
+            use_ssl: Whether to use SSL (optional, uses settings if not provided)
+            username: Email username (optional, uses settings if not provided)
+            password: Email password/access token (optional, uses settings if not provided)
+        """
         self._connection = None
+        # Store custom credentials if provided
+        self._server = server
+        self._port = port
+        self._use_ssl = use_ssl
+        self._username = username
+        self._password = password
     
     def __enter__(self):
         """Connect to email server."""
         try:
-            # Get email server configuration from settings
-            email_config = settings.email_server_config
-            
-            logger.info(f"Connecting to {email_config['server']}:{email_config['port']}")
-            
-            if email_config['use_ssl']:
-                self._connection = imaplib.IMAP4_SSL(email_config['server'], email_config['port'])
+            # Use custom credentials if provided, otherwise fall back to settings
+            if self._server and self._username and self._password:
+                server = self._server
+                port = self._port or 993
+                use_ssl = self._use_ssl if self._use_ssl is not None else True
+                username = self._username
+                password = self._password
             else:
-                self._connection = imaplib.IMAP4(email_config['server'], email_config['port'])
+                # Get email server configuration from settings
+                email_config = settings.email_server_config
+                server = email_config['server']
+                port = email_config['port']
+                use_ssl = email_config['use_ssl']
+                username = settings.email_username
+                password = settings.email_password
+            
+            logger.info(f"Connecting to {server}:{port}")
+            
+            if use_ssl:
+                self._connection = imaplib.IMAP4_SSL(server, port)
+            else:
+                self._connection = imaplib.IMAP4(server, port)
             
             # Login with credentials
-            self._connection.login(settings.email_username, settings.email_password)
-            logger.info(f"Connected to {email_config['server']}:{email_config['port']}")
+            self._connection.login(username, password)
+            logger.info(f"Connected to {server}:{port}")
             
             return self
             

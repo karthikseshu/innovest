@@ -168,6 +168,12 @@ class CashAppParser(BaseParser):
 
             self.logger.info(f"Parsing Cash App email: {subject}")
             self.logger.info(f"Email body length: {len(body)}")
+            self.logger.info(f"Email body preview: {body[:500]}...")
+            
+            # Debug: Check if we can find transaction numbers in the raw body
+            import re
+            txn_matches = re.findall(r'#D-[A-Za-z0-9-]+', body)
+            self.logger.info(f"Transaction number matches in body: {txn_matches}")
 
             content = body + " " + subject
 
@@ -296,6 +302,7 @@ class CashAppParser(BaseParser):
             # Extract additional details from the (preferentially) inner parsing_body
             deposited_to = self._extract_deposited_to(parsing_body, subject)
             transaction_number = self._extract_transaction_number(parsing_body, subject)
+            self.logger.info(f"Extracted transaction number: '{transaction_number}'")
 
             # If we couldn't find a transaction number (or sender resolved to 'You'), try HTML part fallback
             if (not transaction_number) or (sender and sender.strip().lower() == 'you'):
@@ -648,32 +655,57 @@ class CashAppParser(BaseParser):
             r"(?:Transaction|Payment|Confirmation)\s+(?:number|no\.?|id)[:\s-]*([^\n\r]+)",
             raw, re.IGNORECASE
         )
+        
+        # Also try the specific format we see in the logs: | #D-V8V9ODVK |
+        if not labelled_match:
+            pipe_match = re.search(r"\|.*?(#D[-A-Za-z0-9]+).*?\|", raw)
+            if pipe_match:
+                txn = pipe_match.group(1)
+                self.logger.info(f"Found transaction number in pipe format: '{txn}'")
+                return txn
         if labelled_match:
             txn = labelled_match.group(1).strip()
             txn = re.sub(r'<[^>]+>', '', txn).strip()
             txn = txn.strip(' \t\r\n.:;"')
-            if txn and (txn.upper().startswith('D') and not txn.startswith('#')):
-                txn = '#' + txn
-            self.logger.info(f"Found explicit labelled transaction number: '{txn}'")
-            return txn if txn else None
+            
+            # If we got just pipes or other junk, ignore it and continue searching
+            if txn and txn not in ['|', '||', '|||', '|  |']:
+                if txn.upper().startswith('D') and not txn.startswith('#'):
+                    txn = '#' + txn
+                self.logger.info(f"Found explicit labelled transaction number: '{txn}'")
+                return txn
+            else:
+                self.logger.info(f"Labelled match returned junk: '{txn}', continuing search...")
 
         # 2) If label is on its own line, look on the following lines for any non-empty value (take the full line)
         try:
             lines = [l.rstrip() for l in raw.splitlines()]
             for i, line in enumerate(lines):
                 if 'transaction' in line.lower() and 'number' in line.lower():
-                    for j in range(i+1, min(i+6, len(lines))):
+                    for j in range(i+1, min(i+10, len(lines))):  # Increased range to search more lines
                         candidate = lines[j].strip()
                         candidate = re.sub(r'<[^>]+>', '', candidate).strip()
                         candidate = candidate.strip(' \t\r\n.:;"')
-                        if not candidate:
+                        
+                        # Skip empty lines and lines that are just pipes
+                        if not candidate or candidate in ['|', '||', '|||', '|  |'] or re.match(r'^\|[\s|]*\|?$', candidate):
                             continue
+                        
+                        # Prefer lines that look like transaction numbers
                         if re.match(r'^[#]?[Dd]-[A-Za-z0-9-]+$', candidate):
                             if candidate and candidate.upper().startswith('D') and not candidate.startswith('#'):
                                 candidate = '#' + candidate
                             self.logger.info(f"Found transaction number on following line (preferred): '{candidate}'")
                             return candidate
-                        if len(candidate) > 0:
+                        
+                        # Also try to extract transaction number from the line using regex
+                        txn_in_line = re.search(r'(#D[-A-Za-z0-9]+)', candidate)
+                        if txn_in_line:
+                            self.logger.info(f"Found transaction number in line (regex): '{txn_in_line.group(1)}'")
+                            return txn_in_line.group(1)
+                        
+                        # Fallback: take first non-empty, non-pipe line
+                        if len(candidate) > 1 and not candidate.startswith('|'):
                             self.logger.info(f"Found transaction number on following line (fallback): '{candidate}'")
                             return candidate
         except Exception:
@@ -684,6 +716,7 @@ class CashAppParser(BaseParser):
             r"#D[-A-Za-z0-9]+",  # Explicit #D- pattern
             r"/payments/([A-Za-z0-9\-]{6,})",  # IDs in /payments/<id>/receipt URLs (but reject UUIDs)
             r"#([A-Za-z0-9-]+)",  # Simple "#123" format
+            r"\|.*?(#D[-A-Za-z0-9]+).*?\|",  # Pattern for | #D-V8V9ODVK | format
         ]
 
         for pattern in exact_patterns:

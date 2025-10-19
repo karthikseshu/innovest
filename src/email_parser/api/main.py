@@ -76,30 +76,32 @@ async def startup_event():
     logger.info(f"Starting {settings.app_name} v1.0.0")
     logger.info(f"Environment: {settings.log_level}")
     
-    # Test connections on startup
+    # Test Supabase connection instead of old email connection
     try:
-        from ..core.transaction_processor import TransactionProcessor
-        processor = TransactionProcessor()
-        status = processor.test_connection()
+        from config.supabase import get_supabase_client
         
-        # Database support was removed; only require email connection by default.
-        if status.get("email_connection"):
-            logger.info("Email connection successful")
-            # If a database_connection key still exists (legacy), report it.
-            if "database_connection" in status:
-                if status.get("database_connection"):
-                    logger.info("Database connection successful")
-                else:
-                    logger.warning("Database connection failed")
-            else:
-                logger.info("Database connection not configured / skipped")
+        # Test Supabase connection
+        supabase = get_supabase_client(use_service_role=True, schema='api')
+        logger.info("✅ Supabase connection initialized")
+        
+        # Test fetching OAuth integrations
+        from ..core.email_integration_manager import EmailIntegrationManager
+        integration_manager = EmailIntegrationManager()
+        integrations = integration_manager.get_active_oauth_integrations()
+        
+        if integrations:
+            logger.info(f"✅ Found {len(integrations)} active OAuth integrations")
+            for integration in integrations:
+                logger.info(f"   - {integration.email_username} (user: {integration.user_id})")
         else:
-            logger.warning("Email connection failed on startup")
-            for error in status.get("errors", []):
-                logger.warning(f"Connection error: {error}")
+            logger.warning("⚠️  No active OAuth integrations found in Supabase")
+            logger.warning("   Add OAuth integrations to api.email_integrations table")
+        
+        logger.info("All connections successful")
     
     except Exception as e:
-        logger.error(f"Startup connection test failed: {e}")
+        logger.error(f"⚠️  Startup check failed: {e}")
+        logger.warning("Application will start, but Supabase integration may not work")
 
 
 @app.on_event("shutdown")
