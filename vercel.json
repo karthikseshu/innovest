@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/email_parser/api/main.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/email_parser/api/main.py"
+    }
+  ],
+  "env": {
+    "PYTHON_VERSION": "3.11"
+  },
+  "regions": ["iad1"],
+  "functions": {
+    "src/email_parser/api/main.py": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  }
+}
+
