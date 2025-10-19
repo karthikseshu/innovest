@@ -15,13 +15,8 @@ sqlalchemy==2.0.25
 httpx==0.26.0
 requests==2.31.0
 
-# Supabase
+# Supabase - let supabase package handle its own dependencies
 supabase==2.3.4
-postgrest-py==0.10.6
-realtime==1.0.5
-supafunc==0.3.3
-storage3==0.7.4
-gotrue==2.3.2
 
 # OAuth and Gmail API
 google-auth==2.26.2
