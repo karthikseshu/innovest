@@ -527,21 +527,16 @@ async def batch_daily_sync(
         # Process each integration
         for integration in integrations:
             try:
-                # Get email_username from integration (this is the sender to search for)
-                sender_email = integration.email_username
+                # Get sender emails to search for from integration configuration
+                # This is a list of payment provider emails (e.g., ['cash@square.com', 'venmo@venmo.com'])
+                sender_emails = integration.sender_emails
                 
-                if not sender_email:
-                    logger.warning(f"Integration {integration.id} has no email_username, skipping")
-                    all_results["total_errors"] += 1
-                    all_results["integration_results"].append({
-                        "integration_id": integration.id,
-                        "user_id": integration.user_id,
-                        "email_username": None,
-                        "error": "No email_username configured"
-                    })
-                    continue
+                # If no sender_emails configured, use common payment providers as default
+                if not sender_emails:
+                    sender_emails = ['cash@square.com']  # Default to Cash App
+                    logger.info(f"Integration {integration.id} has no sender_emails configured, using default: {sender_emails}")
                 
-                logger.info(f"Processing integration {integration.id}: searching for emails from {sender_email}")
+                logger.info(f"Processing integration {integration.id} ({integration.email_username}): searching for emails from {sender_emails}")
                 
                 # Refresh OAuth token if needed
                 if not integration_manager.refresh_oauth_token_if_needed(integration):
@@ -550,40 +545,63 @@ async def batch_daily_sync(
                     all_results["integration_results"].append({
                         "integration_id": integration.id,
                         "user_id": integration.user_id,
-                        "email_username": sender_email,
+                        "email_username": integration.email_username,
+                        "sender_emails": sender_emails,
                         "error": "OAuth token refresh failed"
                     })
                     continue
                 
-                # Process emails from this integration for the target date
-                # Search for payment emails from the user's own email address
-                result = multi_account_processor.process_emails_by_sender_date_range(
-                    sender_email=sender_email,
-                    start_date=start_datetime,
-                    end_date=end_datetime
-                )
+                # Process emails from each configured sender
+                integration_emails_processed = 0
+                integration_transactions_parsed = 0
+                integration_inserted = 0
+                integration_duplicates = 0
+                integration_errors = 0
                 
-                # Insert into Supabase
-                insert_result = get_supabase_sync().insert_transactions(result.get("transactions", []))
+                for sender_email in sender_emails:
+                    logger.info(f"  → Searching for emails from {sender_email}")
+                    
+                    # Process emails from this sender for the target date
+                    result = multi_account_processor.process_emails_by_sender_date_range(
+                        sender_email=sender_email,
+                        start_date=start_datetime,
+                        end_date=end_datetime
+                    )
+                    
+                    # Insert into Supabase
+                    if result.get("transactions"):
+                        insert_result = get_supabase_sync().insert_transactions(result.get("transactions", []))
+                        
+                        # Aggregate results for this sender
+                        integration_emails_processed += result.get("processed_emails", 0)
+                        integration_transactions_parsed += result.get("new_transactions", 0)
+                        integration_inserted += insert_result.get("inserted_count", 0)
+                        integration_duplicates += insert_result.get("duplicate_count", 0)
+                        integration_errors += result.get("errors", 0) + insert_result.get("error_count", 0)
+                        
+                        logger.info(f"    ✓ {sender_email}: {result.get('processed_emails', 0)} emails, {insert_result.get('inserted_count', 0)} transactions inserted")
+                    else:
+                        logger.info(f"    - {sender_email}: No transactions found")
                 
-                # Aggregate results
+                # Aggregate results for this integration
                 all_results["integrations_processed"] += 1
-                all_results["total_emails_processed"] += result.get("processed_emails", 0)
-                all_results["total_transactions_parsed"] += result.get("new_transactions", 0)
-                all_results["total_inserted_to_supabase"] += insert_result.get("inserted_count", 0)
-                all_results["total_duplicates"] += insert_result.get("duplicate_count", 0)
-                all_results["total_errors"] += result.get("errors", 0) + insert_result.get("error_count", 0)
+                all_results["total_emails_processed"] += integration_emails_processed
+                all_results["total_transactions_parsed"] += integration_transactions_parsed
+                all_results["total_inserted_to_supabase"] += integration_inserted
+                all_results["total_duplicates"] += integration_duplicates
+                all_results["total_errors"] += integration_errors
                 
                 # Add integration-specific results
                 all_results["integration_results"].append({
                     "integration_id": integration.id,
                     "user_id": integration.user_id,
-                    "email_username": sender_email,
-                    "emails_processed": result.get("processed_emails", 0),
-                    "transactions_parsed": result.get("new_transactions", 0),
-                    "inserted_to_supabase": insert_result.get("inserted_count", 0),
-                    "duplicates": insert_result.get("duplicate_count", 0),
-                    "errors": result.get("errors", 0) + insert_result.get("error_count", 0)
+                    "email_username": integration.email_username,
+                    "sender_emails": sender_emails,
+                    "emails_processed": integration_emails_processed,
+                    "transactions_parsed": integration_transactions_parsed,
+                    "inserted_to_supabase": integration_inserted,
+                    "duplicates": integration_duplicates,
+                    "errors": integration_errors
                 })
                 
                 # Update last sync time
@@ -595,7 +613,8 @@ async def batch_daily_sync(
                 all_results["integration_results"].append({
                     "integration_id": integration.id if hasattr(integration, 'id') else None,
                     "user_id": integration.user_id if hasattr(integration, 'user_id') else None,
-                    "email_username": sender_email if 'sender_email' in locals() else None,
+                    "email_username": integration.email_username if hasattr(integration, 'email_username') else None,
+                    "sender_emails": sender_emails if 'sender_emails' in locals() else None,
                     "error": str(e)
                 })
         

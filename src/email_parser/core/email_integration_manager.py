@@ -41,6 +41,13 @@ class EmailIntegration:
         
         # Status
         self.is_active = integration_data.get('is_active', True)
+        
+        # Payment provider sender emails to search for
+        # This can be a list of email addresses (e.g., ['cash@square.com', 'venmo@venmo.com'])
+        self.sender_emails = integration_data.get('sender_emails', [])
+        if isinstance(self.sender_emails, str):
+            # Handle case where it might be stored as a string instead of array
+            self.sender_emails = [self.sender_emails] if self.sender_emails else []
         self.last_sync_at = integration_data.get('last_sync_at')
     
     def is_oauth(self) -> bool:
