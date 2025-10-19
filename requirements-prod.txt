@@ -1,4 +1,7 @@
-# Core dependencies - pinned versions for stability
+# Production dependencies only - optimized for Render deployment
+# Use this file in Render to speed up builds and reduce memory usage
+
+# Core dependencies
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
 pydantic>=2.0,<3.0
@@ -7,13 +10,12 @@ python-dotenv==1.0.0
 
 # Database
 sqlalchemy==2.0.25
-alembic==1.13.1
 
 # HTTP client
 httpx==0.26.0
 requests==2.31.0
 
-# Supabase - pinned version
+# Supabase
 supabase==2.3.4
 postgrest-py==0.13.2
 realtime==1.0.5
@@ -30,18 +32,6 @@ google-api-python-client==2.115.0
 # Date parsing
 python-dateutil==2.8.2
 
-# Email parsing
-email-validator==2.1.0
-
 # Production server
 python-multipart==0.0.6
 
-# Testing (optional - can be removed for production)
-pytest==7.4.4
-pytest-asyncio==0.23.3
-pytest-cov==4.1.0
-
-# Code quality (optional - can be removed for production)
-black==23.12.1
-flake8==7.0.0
-mypy==1.8.0
